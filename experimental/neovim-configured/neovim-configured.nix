@@ -1,5 +1,4 @@
-{pkgs, ...}:
-{
+{pkgs, ...}: {
   neovim = pkgs.wrapNeovim pkgs.neovim-unwrapped {
     viAlias = false;
     vimAlias = false;
