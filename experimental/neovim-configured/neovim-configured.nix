@@ -7,11 +7,7 @@
     withRuby = false;
     configure = {
       packages.myVimPacakge = with pkgs.vimPlugins; {
-        start = let
-          parsers = with pkgs.lib;
-            filter isDerivation (builtins.attrValues nvim-treesitter-parsers);
-        in
-          [nvim-treesitter] ++ parsers;
+        start = [nvim-treesitter.withAllGrammars];
 
         opt = [
           catppuccin-nvim
