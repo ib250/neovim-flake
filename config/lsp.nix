@@ -5,23 +5,19 @@
       servers = {
         bashls.enable = true;
         clangd.enable = true;
-        gopls.enable = true;
         jsonls.enable = true;
         lua-ls.enable = true;
         metals.enable = true;
         nil_ls.enable = true;
         pyright.enable = true;
-        pylsp = {
-          enable = true;
-          settings.plugins.pylsp_mypy.enabled = true;
-          settings.plugins.ruff.enabled = true;
-        };
+        ruff-lsp.enable = true;
+        tsserver.enable = true;
+        yamlls.enable = true;
+        gopls.enable = true;
         rust-analyzer = {
           enable = true;
           settings.hover.actions.enable = true;
         };
-        tsserver.enable = true;
-        yamlls.enable = true;
       };
 
       postConfig = builtins.readFile ./lua/lsp-post-config.lua;
