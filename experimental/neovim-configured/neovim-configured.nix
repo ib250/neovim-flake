@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs ? import <nixpkgs> {}, ...}: {
   neovim = pkgs.wrapNeovim pkgs.neovim-unwrapped {
     viAlias = false;
     vimAlias = false;
@@ -6,7 +6,7 @@
     withNodeJs = true;
     withRuby = false;
     configure = {
-      packages.myVimPacakge = with pkgs.vimPlugins; {
+      packages.myVimPackage = with pkgs.vimPlugins; {
         start = [nvim-treesitter.withAllGrammars];
 
         opt = [
@@ -47,4 +47,28 @@
       };
     };
   };
+
+  language-servers = [
+    # core language servers
+    pkgs.nodePackages.bash-language-server # bash
+    pkgs.vscode-langservers-extracted # vscode html, css, etc
+    (
+      if builtins.hasAttr "lua-language-server" pkgs
+      then pkgs.lua-language-server
+      else pkgs.sumneko-lua-language-server
+    )
+    pkgs.nil # amazing nix lsp
+    pkgs.nodePackages.typescript-language-server # ts + js
+    pkgs.nodePackages.vls # vue
+    pkgs.yaml-language-server # yaml
+    #  misc formatters + linters
+    pkgs.nodePackages.eslint
+    pkgs.shellcheck
+    pkgs.statix
+    pkgs.cppcheck
+    pkgs.deadnix
+    pkgs.shfmt
+    pkgs.sqlfluff
+    pkgs.taplo
+  ];
 }
