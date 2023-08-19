@@ -10,6 +10,7 @@
         start = [nvim-treesitter.withAllGrammars];
 
         opt = [
+          editorconfig-nvim
           catppuccin-nvim
           cmp-buffer
           cmp-nvim-lsp
