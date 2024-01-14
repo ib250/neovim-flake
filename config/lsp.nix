@@ -1,52 +1,58 @@
 {pkgs, ...}: {
   config = {
-    plugins.lsp = {
-      enable = true;
-      servers = {
-        bashls.enable = true;
-        clangd.enable = true;
-        jsonls.enable = true;
-        lua-ls.enable = true;
-        metals.enable = true;
-        nil_ls.enable = true;
-        pyright.enable = true;
-        ruff-lsp.enable = true;
-        tsserver.enable = true;
-        yamlls.enable = true;
-        gopls.enable = true;
-        rust-analyzer = {
-          enable = true;
-          settings.hover.actions.enable = true;
+    plugins = {
+      lsp = {
+        enable = true;
+        servers = {
+          bashls.enable = true;
+          clangd.enable = true;
+          jsonls.enable = true;
+          lua-ls.enable = true;
+          metals.enable = true;
+          nil_ls.enable = true;
+          pyright.enable = true;
+          ruff-lsp.enable = true;
+          tsserver.enable = true;
+          yamlls.enable = true;
+          gopls.enable = true;
+          rust-analyzer = {
+            enable = true;
+            settings.hover.actions.enable = true;
+          };
         };
+
+        postConfig = builtins.readFile ./lua/lsp-post-config.lua;
       };
 
-      postConfig = builtins.readFile ./lua/lsp-post-config.lua;
-    };
+      rust-tools.enable = true;
 
-    plugins.rust-tools.enable = true;
-
-    plugins.null-ls = {
-      enable = true;
-      shouldAttach = ''
-        function(bufnr)
-          return not vim.api.nvim_buf_get_name(bufnr):match("^git://")
-        end
-      '';
-      sources = {
-        code_actions.shellcheck.enable = true;
-        code_actions.statix.enable = true;
-        diagnostics.cppcheck.enable = true;
-        diagnostics.deadnix.enable = true;
-        diagnostics.flake8.enable = true;
-        diagnostics.gitlint.enable = true;
-        diagnostics.shellcheck.enable = true;
-        diagnostics.statix.enable = true;
-        formatting.alejandra.enable = true;
-        formatting.black.enable = true;
-        formatting.prettier.enable = true;
-        formatting.shfmt.enable = true;
-        formatting.stylua.enable = true;
-        formatting.taplo.enable = true;
+      null-ls = {
+        enable = true;
+        shouldAttach = ''
+          function(bufnr)
+            return not vim.api.nvim_buf_get_name(bufnr):match("^git://")
+          end
+        '';
+        sources = {
+          code_actions.shellcheck.enable = true;
+          code_actions.statix.enable = true;
+          diagnostics = {
+            cppcheck.enable = true;
+            deadnix.enable = true;
+            flake8.enable = true;
+            gitlint.enable = true;
+            shellcheck.enable = true;
+            statix.enable = true;
+          };
+          formatting = {
+            alejandra.enable = true;
+            black.enable = true;
+            prettier.enable = true;
+            shfmt.enable = true;
+            stylua.enable = true;
+            taplo.enable = true;
+          };
+        };
       };
     };
 
