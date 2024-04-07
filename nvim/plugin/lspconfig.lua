@@ -3,10 +3,10 @@ if vim.g.did_load_lspconfig_plugin then
 end
 vim.g.did_load_lspconfig_plugin = true
 
-local none_ls = require("null-ls")
+local none_ls = require('null-ls')
 none_ls.setup {
   sould_attach = function(bufnr)
-    return not vim.api.nvim_buf_get_name(bufnr):match("^git://")
+    return not vim.api.nvim_buf_get_name(bufnr):match('^git://')
   end,
   sources = {
     none_ls.builtins.formatting.stylua,
@@ -27,62 +27,58 @@ none_ls.setup {
 
     none_ls.builtins.code_actions.statix,
     none_ls.builtins.code_actions.gitsigns,
-  }
+  },
 }
 
-
-local lspconfig = require("lspconfig")
+local lspconfig = require('lspconfig')
 local servers = {
-  { name = "yamlls" },
-  { name = "jsonls" },
-  { name = "pyright" },
-  { name = "gopls" },
+  { name = 'yamlls' },
+  { name = 'jsonls' },
+  { name = 'pyright' },
+  { name = 'gopls' },
   {
-    name = "clangd",
+    name = 'clangd',
     extraOptions = {
       on_attach = function(_, _)
-        require("clangd_extensions.inlay_hints").setup_autocmd()
-        require("clangd_extensions.inlay_hints").set_inlay_hints()
-      end
-    }
+        require('clangd_extensions.inlay_hints').setup_autocmd()
+        require('clangd_extensions.inlay_hints').set_inlay_hints()
+      end,
+    },
   },
-  { name = "bashls" },
-  { name = "tsserver" },
-  { name = "vuels" },
-  { name = "dockerls" },
-  { name = "docker_compose_language_service" },
-  { name = "denols" },
-  { name = "ruff_lsp" },
-  { name = "gopls" },
+  { name = 'bashls' },
+  { name = 'tsserver' },
+  { name = 'vuels' },
+  { name = 'dockerls' },
+  { name = 'docker_compose_language_service' },
+  { name = 'denols' },
+  { name = 'volar' },
+  { name = 'ruff_lsp' },
+  { name = 'gopls' },
 }
-
 
 local default_opts = {
   on_attach = function(_, _)
     print(vim.lsp.buf.list_workspace_folders())
   end,
-  capabilities = require("user.lsp").make_client_capabilities(),
+  capabilities = require('user.lsp').make_client_capabilities(),
 }
 
-for _, server in ipairs(servers)
-do
+for _, server in ipairs(servers) do
   local options = server.extraOptions
   if options == nil then
     lspconfig[server.name].setup(default_opts)
   else
-    lspconfig[server.name].setup(
-      vim.tbl_extend("keep", options, default_opts)
-    )
+    lspconfig[server.name].setup(vim.tbl_extend('keep', options, default_opts))
   end
 end
 
-
-vim.g.rustaceannvim = {
-  tools = {},
-  server = {
-    on_attach = default_opts.on_attach,
-    default_settings = {
-      ['rust-analyzer'] = {}
-    },
-  },
+require('nlspsettings').setup {
+  config_home = vim.fn.stdpath('config') .. '/nlsp-settings',
+  local_settings_dir = '.nvim',
+  local_settings_root_markers_fallback = { '.git', 'Makefile', 'CmakeLists.txt', 'build' },
+  append_default_schemas = true,
+  loader = 'json',
+  open_strictly = false,
+  nvim_notify = { enable = false, timeout = 5000 },
+  ignored_servers = {},
 }

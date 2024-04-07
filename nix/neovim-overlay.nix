@@ -68,9 +68,10 @@ with final.pkgs.lib; let
     nvim-lspconfig
     none-ls-nvim
     clangd_extensions-nvim
+    # (mkNvimPlugin inputs.rust-tools "rust-tools.nvim")
+    rustaceanvim
     nlsp-settings-nvim
     vim-just
-    rustaceanvim
     # ^ language support
 
     # navigation/editing enhancement plugins
@@ -105,6 +106,8 @@ with final.pkgs.lib; let
     nodePackages_latest.bash-language-server
     nodePackages_latest.prettier
     nodePackages_latest.volar
+    nodePackages_latest.dockerfile-language-server-nodejs
+    docker-compose-language-service
     clang-tools_17
     nodePackages.pyright
     ruff-lsp

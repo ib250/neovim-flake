@@ -16,6 +16,8 @@ function M.make_client_capabilities()
   local cmp_lsp_capabilities = cmp_lsp.default_capabilities()
   capabilities = vim.tbl_deep_extend('keep', capabilities, cmp_lsp_capabilities)
   -- Add any additional plugin capabilities here.
+  capabilities.offsetEncoding = {"utf-16"}
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
   -- Make sure to follow the instructions provided in the plugin's docs.
   return capabilities
 end
