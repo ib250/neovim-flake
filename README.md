@@ -1,6 +1,6 @@
 # Neovim flake
 
-Standalone neovim configuration with nixvim
+Standalone neovim configuration with kickstart-nix.nvim
 
 ## Testing your new configuration
 
