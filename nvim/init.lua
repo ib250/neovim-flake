@@ -4,7 +4,7 @@ local opt = vim.o
 local g = vim.g
 
 -- <leader> key. Defaults to `\`. Some people prefer space.
--- g.mapleader = ' '
+g.mapleader = ';'
 -- g.maplocalleader = ' '
 
 opt.compatible = false
@@ -26,10 +26,8 @@ opt.lazyredraw = true
 opt.showmatch = true -- Highlight matching parentheses, etc
 opt.incsearch = true
 opt.hlsearch = true
-
 opt.spell = true
 opt.spelllang = 'en'
-
 opt.expandtab = true
 opt.tabstop = 2
 opt.softtabstop = 2
@@ -41,49 +39,20 @@ opt.undofile = true
 opt.splitright = true
 opt.splitbelow = true
 opt.cmdheight = 0
+opt.fillchars = [[eob: ,fold: ,foldopen:+,foldsep: ,foldclose:-]]
+opt.clipboard = "unnamedplus"
+opt.ignorecase = true
+opt.smartcase = true
+opt.hlsearch = true
+opt.cursorline = false
+opt.autochdir = true
 
-opt.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
 
 -- Configure Neovim diagnostic messages
 
-local function prefix_diagnostic(prefix, diagnostic)
-  return string.format(prefix .. ' %s', diagnostic.message)
-end
-
-local sign = function(opts)
-  fn.sign_define(opts.name, {
-    texthl = opts.name,
-    text = opts.text,
-    numhl = '',
-  })
-end
--- Requires Nerd fonts
-sign { name = 'DiagnosticSignError', text = '󰅚' }
-sign { name = 'DiagnosticSignWarn', text = '⚠' }
-sign { name = 'DiagnosticSignInfo', text = 'ⓘ' }
-sign { name = 'DiagnosticSignHint', text = '󰌶' }
-
 vim.diagnostic.config {
-  virtual_text = {
-    prefix = '',
-    format = function(diagnostic)
-      local severity = diagnostic.severity
-      if severity == vim.diagnostic.severity.ERROR then
-        return prefix_diagnostic('󰅚', diagnostic)
-      end
-      if severity == vim.diagnostic.severity.WARN then
-        return prefix_diagnostic('⚠', diagnostic)
-      end
-      if severity == vim.diagnostic.severity.INFO then
-        return prefix_diagnostic('ⓘ', diagnostic)
-      end
-      if severity == vim.diagnostic.severity.HINT then
-        return prefix_diagnostic('󰌶', diagnostic)
-      end
-      return prefix_diagnostic('■', diagnostic)
-    end,
-  },
-  signs = true,
+  virtual_text = false,
+  signs = false,
   update_in_insert = false,
   underline = true,
   severity_sort = true,
@@ -111,5 +80,17 @@ vim.g.sqlite_clib_path = require('luv').os_getenv('LIBSQLITE')
 -- this should be at the end, because
 -- it causes neovim to source ftplugins
 -- on the packpath when passing a file to the nvim command
+cmd.colorscheme([[catppuccin]])
 cmd.syntax('on')
 cmd.syntax('enable')
+
+-- muscle memory things...
+vim.keymap.set('i', 'jk', '<ESC>')
+vim.keymap.set('i', 'kj', '<ESC>')
+vim.keymap.set('c', 'jk', '<ESC>')
+vim.keymap.set('c', 'kj', '<ESC>')
+vim.keymap.set('v', 'jk', '<ESC>')
+vim.keymap.set('v', 'kj', '<ESC>')
+vim.keymap.set('n', '<c-p>', '<cmd>Telescope<cr>', { desc = 'Telescope command pallete' })
+vim.keymap.set('n', 'qq', '<ESC>')
+vim.keymap.set('n', '<leader> ', '<cmd>noh<cr>', { desc = 'Clear all highlights' })

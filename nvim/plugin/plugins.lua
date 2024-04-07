@@ -8,3 +8,9 @@ vim.g.did_load_plugins_plugin = true
 
 require('nvim-surround').setup()
 require('which-key').setup()
+require("catppuccin").setup {
+  integrations = {
+    native_lsp = { enabled = true },
+    treesitter = true,
+  }
+}
