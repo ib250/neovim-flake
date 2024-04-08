@@ -102,7 +102,7 @@ with final.pkgs.lib; let
     nil # nix LSP
     nodePackages_latest.yaml-language-server
     nodePackages_latest.typescript-language-server
-    nodePackages_latest.vscode-json-languageserver-bin
+    nodePackages_latest.vscode-langservers-extracted
     nodePackages_latest.bash-language-server
     nodePackages_latest.prettier
     nodePackages_latest.volar

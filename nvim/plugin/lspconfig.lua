@@ -47,7 +47,6 @@ local servers = {
   },
   { name = 'bashls' },
   { name = 'tsserver' },
-  { name = 'vuels' },
   { name = 'dockerls' },
   { name = 'docker_compose_language_service' },
   { name = 'denols' },
