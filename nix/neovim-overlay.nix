@@ -77,7 +77,7 @@ with final.pkgs.lib; let
     # navigation/editing enhancement plugins
     nvim-surround # https://github.com/kylechui/nvim-surround/
     nvim-treesitter-textobjects # https://github.com/nvim-treesitter/nvim-treesitter-textobjects/
-    nvim-ts-context-commentstring # https://github.com/joosepalviste/nvim-ts-context-commentstring/
+    # nvim-ts-context-commentstring # https://github.com/joosepalviste/nvim-ts-context-commentstring/
     nvim-treesitter-pyfold
     nvim-treesitter-refactor
     # ^ navigation/editing enhancement plugins
