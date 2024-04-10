@@ -39,7 +39,9 @@ with lib;
       runtime = {};
     };
 
-    externalPackages = extraPackages ++ (optionals withSqlite [pkgs.sqlite]);
+    externalPackages =
+      extraPackages
+      ++ (optionals withSqlite [pkgs.sqlite]);
 
     # Map all plugins to an attrset { plugin = <plugin>; config = <config>; optional = <tf>; ... }
     normalizedPlugins = map (x:
@@ -54,7 +56,14 @@ with lib;
     # This nixpkgs util function creates an attrset
     # that pkgs.wrapNeovimUnstable uses to configure the Neovim build.
     neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
-      inherit extraPython3Packages withPython3 withRuby withNodeJs viAlias vimAlias;
+      inherit
+        extraPython3Packages
+        withPython3
+        withRuby
+        withNodeJs
+        viAlias
+        vimAlias
+        ;
       plugins = normalizedPlugins;
     };
 
@@ -150,20 +159,23 @@ with lib;
         ''--set LIBSQLITE "${pkgs.sqlite.out}/lib/libsqlite3.so"'')
     );
 
+    # needed for nix lazy-helper
+    extraLuaPackages = [pkgs.luaPackages.dkjson] ++ resolvedExtraLuaPackages;
+
     # Native Lua libraries
-    extraMakeWrapperLuaCArgs = optionalString (resolvedExtraLuaPackages != []) ''
+    extraMakeWrapperLuaCArgs = optionalString (extraLuaPackages != []) ''
       --suffix LUA_CPATH ";" "${
         lib.concatMapStringsSep ";" pkgs.luaPackages.getLuaCPath
-        resolvedExtraLuaPackages
+        extraLuaPackages
       }"'';
 
     # Lua libraries
     extraMakeWrapperLuaArgs =
-      optionalString (resolvedExtraLuaPackages != [])
+      optionalString (extraLuaPackages != [])
       ''
         --suffix LUA_PATH ";" "${
           concatMapStringsSep ";" pkgs.luaPackages.getLuaPath
-          resolvedExtraLuaPackages
+          extraLuaPackages
         }"'';
   in
     # wrapNeovimUnstable is the nixpkgs utility function for building a Neovim derivation.
