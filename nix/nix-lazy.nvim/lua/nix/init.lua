@@ -1,7 +1,7 @@
-local manifest = require('nix.manifest')
+local manifest = require("nix.manifest")
 
 local function nixify(config)
-  if type(config) == 'string' then
+  if type(config) == "string" then
     return { dir = manifest[config:lower()] }
   end
 
@@ -10,12 +10,12 @@ local function nixify(config)
   end
 
   if manifest[config[1]:lower()] == nil then
-    error('Failed to load plugins ' .. vim.inspect { config = config, manifest = manifest })
+    error("Failed to load plugins " .. vim.inspect({ config = config, manifest = manifest }))
   end
 
   local top_level_key = table.remove(config, 1)
   local path_opts = { dir = manifest[top_level_key:lower()] }
-  local top_level = vim.tbl_extend('keep', config, path_opts)
+  local top_level = vim.tbl_extend("keep", config, path_opts)
   if top_level.dependencies == nil then
     return top_level
   end
@@ -36,7 +36,7 @@ return {
       table.insert(config, nixify(plugin_opts))
     end
 
-    require('lazy').setup(config, {
+    require("lazy").setup(config, {
       root = nil,
       install = { missing = false },
       change_detection = { enabled = false },
@@ -45,8 +45,8 @@ return {
         rtp = {
           reset = false,
         },
-        reset_packpath = false
-      }
+        reset_packpath = false,
+      },
     })
   end,
 }
