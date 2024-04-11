@@ -291,24 +291,6 @@ require('nix').setup {
     dependencies = { 'nvim-lua/plenary.nvim' },
   },
 
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
-  --    require('gitsigns').setup({ ... })
-  --
-  -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
-  },
-
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
@@ -1076,8 +1058,20 @@ require('nix').setup {
     keys = '<leader>g',
     dependencies = {
       {
+        -- Here is a more advanced example where we pass configuration
+        -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
+        --    require('gitsigns').setup({ ... })
+        --
+        -- See `:help gitsigns` to understand what the configuration keys do
         'lewis6991/gitsigns.nvim', -- TODO: configure me
         opts = {
+          signs = {
+            add = { text = '+' },
+            change = { text = '~' },
+            delete = { text = '_' },
+            topdelete = { text = '‾' },
+            changedelete = { text = '~' },
+          },
           current_line_blame = false,
           current_line_blame_opts = {
             ignore_whitespace = true,
@@ -1086,8 +1080,8 @@ require('nix').setup {
             vim.keymap.set(
               'n',
               '<leader>gbl',
-              require('gitsigns').toggle_current_line_blame,
-              { desc = '[G]it toggle [b]lame [l]line' }
+              require('gitsigns').blame_line,
+              { desc = '[G]itsigns [b]lame [l]line' }
             )
           end,
         },
