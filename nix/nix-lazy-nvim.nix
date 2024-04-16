@@ -7,11 +7,10 @@
     drv = attr.plugin or attr;
     owner = lib.toLower drv.src.owner;
     repo = lib.toLower drv.src.repo;
-  in ''
-    ["${owner}/${repo}"] = "${drv}",
-  '';
+  in ''["${owner}/${repo}"] = nix_prefix .. "${drv}",'';
 
   manifestLua = with builtins; ''
+    local nix_prefix = os.getenv("NIX_PREFIX") or ""
     return {
      ${concatStringsSep "\n" (map pluginManifestEntry plugins)}
     }

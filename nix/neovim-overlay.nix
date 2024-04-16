@@ -70,8 +70,7 @@ with final.pkgs.lib; let
     none-ls-nvim
     conform-nvim
     clangd_extensions-nvim
-    # (mkNvimPlugin inputs.rust-tools "rust-tools.nvim")
-    rustaceanvim
+    rust-tools-nvim
     nlsp-settings-nvim
     vim-just
     # ^ language support
@@ -145,24 +144,24 @@ with final.pkgs.lib; let
       nixPluginManifest
       pkgs.vimPlugins.lazy-nvim
     ];
-
 in {
   # This is the neovim derivation
   # returned by the overlay
-  nvim-pkg = mkNeovim {
-    plugins = finalPlugins;
-    withNodeJs = true;
-    withPython3 = true;
-    inherit extraPackages;
-  } // {
-    show-nix-plugin-manifest = prev.writeScriptBin "show-nix-plugin-manifest" ''
-      ${prev.bat}/bin/bat ${nixPluginManifest}/lua/nix/manifest.lua
-    '';
-  };
+  nvim-pkg =
+    mkNeovim {
+      plugins = finalPlugins;
+      withNodeJs = true;
+      withPython3 = true;
+      inherit extraPackages;
+    }
+    // {
+      show-nix-plugin-manifest = prev.writeScriptBin "show-nix-plugin-manifest" ''
+        ${prev.bat}/bin/bat ${nixPluginManifest}/lua/nix/manifest.lua
+      '';
+    };
 
   # This can be symlinked in the devShell's shellHook
   nvim-luarc-json = final.mk-luarc-json {
     plugins = finalPlugins;
   };
-
 }

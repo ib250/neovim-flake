@@ -436,7 +436,7 @@ require('nix').setup {
         builtin.live_grep {
           search_dirs = vim.lsp.buf.list_workspace_folders(),
         }
-      end, { desc = '[W]orkspace [/] all files' })
+      end, { desc = '[/] Search [W]orkspace [/] all files' })
 
       -- muscle memory
       vim.keymap.set(
@@ -474,7 +474,15 @@ require('nix').setup {
           )
         end,
       },
-      'mrcjkb/rustaceanvim',
+      {
+        'simrat39/rust-tools.nvim',
+        event = 'LspAttach',
+        ft = { 'rust' },
+        config = function(opts)
+          require('rust-tools').setup(opts)
+          require('rust-tools.inlay_hints').enable {}
+        end,
+      },
       {
         'tamago324/nlsp-settings.nvim',
         opts = {
@@ -698,6 +706,7 @@ require('nix').setup {
         tsserver = {},
         volar = {},
         dockerls = {},
+        rust_analyzer = {},
         docker_compose_language_service = {},
         nil_ls = {},
         denols = {
@@ -868,10 +877,11 @@ require('nix').setup {
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
         },
         sources = {
+          { name = 'nvim_lsp_document_symbol', keyword_length = 3 },
           { name = 'nvim_lsp', keyword_length = 3 },
           { name = 'luasnip', keyword_length = 3 },
-          { name = 'buffer' },
-          { name = 'path' },
+          { name = 'path', keyword_length = 3 },
+          { name = 'buffer', keyword_length = 2 },
         },
       }
 
@@ -931,7 +941,19 @@ require('nix').setup {
       'nvim-treesitter/nvim-treesitter-context',
       'nvim-treesitter/nvim-treesitter-pyfold',
       'nvim-treesitter/nvim-treesitter-refactor',
-      'nvim-treesitter/nvim-treesitter-textobjects',
+      {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        config = function()
+          -- peek bindings
+          vim.keymap.set('n', '<leader>cp', function()
+            vim.cmd.TSTextobjectPeekDefinitionCode '@function.inner'
+          end, { desc = '[C]ode [p]eek function Body' })
+
+          vim.keymap.set('n', '<leader>cP', function()
+            vim.cmd.TSTextobjectPeekDefinitionCode '@function.inner'
+          end, { desc = '[C]ode [P]eek Class Body' })
+        end,
+      },
     },
     opts = {
       -- Autoinstall languages that are not installed
