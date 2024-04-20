@@ -364,6 +364,12 @@ require('nix').setup {
         builtin.find_files,
         { desc = '[S]earch [F]iles' }
       )
+      vim.keymap.set('n', '<C-f>', function()
+        if pcall(builtin.git_files) then
+          return
+        end
+        builtin.find_files()
+      end, { desc = 'Smart [F]ind [F]iles' })
       vim.keymap.set(
         'n',
         '<leader>ss',
@@ -745,10 +751,15 @@ require('nix').setup {
     },
     opts = {
       notify_on_error = false,
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_fallback = true,
-      },
+      format_on_save = function(bufnr)
+        if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+          return
+        end
+        return {
+          timeout_ms = 500,
+          lsp_fallback = true,
+        }
+      end,
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
@@ -774,6 +785,43 @@ require('nix').setup {
         javascript = { { 'prettierd', 'prettier' } },
       },
     },
+    config = function()
+      -- enable format on save by default
+      vim.g.disable_autoformat = false
+
+      vim.api.nvim_create_user_command('FormatDisable', function(args)
+        if args.bang then
+          -- FormatDisable! will disable formatting just for this buffer
+          vim.b[vim.fn.bufnr()].disable_autoformat = true
+        else
+          vim.g.disable_autoformat = true
+        end
+      end, {
+        desc = 'Disable autoformat-on-save',
+        bang = true,
+      })
+
+      vim.api.nvim_create_user_command('FormatEnable', function()
+        vim.b[vim.fn.bufnr()].disable_autoformat = false
+        vim.g.disable_autoformat = false
+      end, {
+        desc = 'Re-enable autoformat-on-save',
+      })
+
+      vim.api.nvim_create_user_command('ToggleFormatOnSave', function(args)
+        if args.bang then
+          -- FormatDisable! will disable formatting just for this buffer
+          local state = vim.b[vim.fn.bufnr()].disable_autoformat
+          vim.b[vim.fn.bufnr()].disable_autoformat = not state
+        else
+          local state = vim.g.disable_autoformat
+          vim.g.disable_autoformat = not state
+        end
+      end, {
+        desc = 'Toggle autoformat-on-save',
+        bang = true,
+      })
+    end,
   },
 
   { -- Autocompletion
@@ -1000,6 +1048,7 @@ require('nix').setup {
         --
         -- See `:help gitsigns` to understand what the configuration keys do
         'lewis6991/gitsigns.nvim', -- TODO: configure me
+        event = 'VimEnter',
         opts = {
           signs = {
             add = { text = '+' },
@@ -1024,7 +1073,9 @@ require('nix').setup {
       },
       {
         'sindrets/diffview.nvim', -- TODO: configure me
-        opts = { use_icons = false },
+        opts = {
+          use_icons = false,
+        },
         config = function()
           vim.keymap.set('n', '<leader>gfb', function()
             vim.cmd.DiffviewFileHistory(vim.api.nvim_buf_get_name(0))
