@@ -113,8 +113,8 @@ with final.pkgs.lib; let
     nodePackages_latest.dockerfile-language-server-nodejs
     docker-compose-language-service
     clang-tools_17
-    nodePackages.pyright
-    ruff-lsp
+    pyright
+    ruff
 
     gopls
     rust-analyzer

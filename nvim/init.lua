@@ -706,7 +706,11 @@ require('nix').setup {
         },
         gopls = {},
         pyright = {},
-        ruff_lsp = {},
+        ruff = {
+          capabilities = {
+            hoverProvider = false
+          }
+        },
         jsonls = {},
         yamlls = {},
         tsserver = {},
