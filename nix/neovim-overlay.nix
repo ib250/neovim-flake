@@ -109,7 +109,6 @@ with final.pkgs.lib; let
     nodePackages_latest.vscode-langservers-extracted
     nodePackages_latest.bash-language-server
     nodePackages_latest.prettier
-    nodePackages_latest.vue-language-server
     nodePackages_latest.dockerfile-language-server-nodejs
     docker-compose-language-service
     clang-tools_17
