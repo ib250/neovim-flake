@@ -714,7 +714,7 @@ require('nix').setup {
         jsonls = {},
         yamlls = {},
         tsserver = {},
-        volar = {},
+        vls = {},
         dockerls = {},
         rust_analyzer = {},
         docker_compose_language_service = {},
