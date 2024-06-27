@@ -54,14 +54,15 @@ with final.pkgs.lib; let
     telescope-nvim # https://github.com/nvim-telescope/telescope.nvim/
     telescope-fzf-native-nvim # https://github.com/nvim-telescope/telescope-fzy-native.nvim
     telescope-ui-select-nvim
+    telescope-frecency-nvim
     # telescope-smart-history-nvim # https://github.com/nvim-telescope/telescope-smart-history.nvim
     # ^ telescope and extensions
 
     # UI.lua
-    nvim-navic # Add LSP location to lualine | https://github.com/SmiteshP/nvim-navic
     # statuscol-nvim # Status column | https://github.com/luukvbaal/statuscol.nvim/
     catppuccin-nvim
     nvim-treesitter-context # nvim-treesitter-context
+    oil-nvim
     # ^ UI
 
     # language support
