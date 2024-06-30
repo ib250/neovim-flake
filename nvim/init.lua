@@ -199,7 +199,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
-
 -- [[ Configure nix installed plugins ]]
 --
 --  To check the current status of your plugins, run
@@ -239,19 +238,29 @@ require('nix').setup {
   {
     'stevearc/oil.nvim',
     config = function()
-      require("oil").setup {
+      require('oil').setup {
         default_file_explorer = true,
-        view_options = { show_hidden = true, },
+        view_options = { show_hidden = true },
         float = {
           padding = 2,
           max_width = 60,
           max_height = 30,
-          border = "rounded"
-        }
+          border = 'rounded',
+        },
       }
 
-      vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory (float)" })
-      vim.keymap.set("n", "<leader>-", "<CMD>Oil<CR>", { desc = "Open parent directory (full screen)" })
+      vim.keymap.set(
+        'n',
+        '-',
+        '<CMD>Oil --float<CR>',
+        { desc = 'Open parent directory (float)' }
+      )
+      vim.keymap.set(
+        'n',
+        '<leader>-',
+        '<CMD>Oil<CR>',
+        { desc = 'Open parent directory (full screen)' }
+      )
     end,
   },
 
@@ -270,7 +279,7 @@ require('nix').setup {
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  {                     -- Useful plugin to show you pending keybinds.
+  { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
@@ -343,7 +352,7 @@ require('nix').setup {
         --  All the info you're looking for is in `:help telescope.setup()`
         --
         defaults = {
-          layout_strategy = 'vertical',
+          layout_strategy = 'flex',
         },
 
         history = {
@@ -424,7 +433,7 @@ require('nix').setup {
       vim.keymap.set(
         'n',
         '<leader>s.',
-        '<CMD>Telescope frecency theme=ivy<CR>',
+        '<CMD>Telescope frecency theme=dropdown previewer=false<CR>',
         { desc = '[S]earch Recent Files ("." for repeat)' }
       )
       vim.keymap.set(
@@ -488,17 +497,21 @@ require('nix').setup {
       {
         'p00f/clangd_extensions.nvim',
         event = 'LspAttach',
-        ft = { 'c', 'cpp', 'proto' },
         config = function(_)
-          local c_inl = require 'clangd_extensions.inlay_hints'
-          c_inl.setup_autocmd()
-          c_inl.set_inlay_hints()
-          vim.keymap.set(
-            'n',
-            '<leader><tab>',
-            vim.cmd.ClangdSwitchSourceHeader,
-            { desc = 'Switch Source-Header' }
-          )
+          vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+            pattern = { '*.c', '*.h', '*.cpp', '*.hpp' },
+            callback = function(_) -- event
+              local c_inl = require 'clangd_extensions.inlay_hints'
+              c_inl.setup_autocmd()
+              c_inl.set_inlay_hints()
+              vim.keymap.set(
+                'n',
+                '<leader><tab>',
+                vim.cmd.ClangdSwitchSourceHeader,
+                { desc = 'Switch Source-Header' }
+              )
+            end,
+          })
         end,
       },
       {
@@ -506,8 +519,13 @@ require('nix').setup {
         event = 'LspAttach',
         ft = { 'rust' },
         config = function(opts)
-          require('rust-tools').setup(opts)
-          require('rust-tools.inlay_hints').enable {}
+          vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+            pattern = { '*.rs', 'Cargo.toml' },
+            callback = function()
+              require('rust-tools').setup(opts)
+              require('rust-tools.inlay_hints').enable {}
+            end,
+          })
         end,
       },
       {
@@ -645,7 +663,7 @@ require('nix').setup {
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
           if
-              client and client.server_capabilities.documentHighlightProvider
+            client and client.server_capabilities.documentHighlightProvider
           then
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -658,9 +676,13 @@ require('nix').setup {
             })
           end
 
-          if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
+          if
+            client
+            and client.server_capabilities.inlayHintProvider
+            and vim.lsp.inlay_hint
+          then
             map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({}))
+              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled {})
             end, '[T]oggle Inlay [H]ints')
           end
         end,
@@ -735,21 +757,28 @@ require('nix').setup {
         pyright = {},
         ruff = {
           capabilities = {
-            hoverProvider = false
-          }
+            hoverProvider = false,
+          },
         },
         jsonls = {},
         yamlls = {},
         tsserver = {
-          root_dir = require("lspconfig.util").root_pattern("package.json", "tsconfig.json", "jsconfig.json"),
-          single_file_support = false
+          root_dir = require('lspconfig.util').root_pattern(
+            'package.json',
+            'tsconfig.json',
+            'jsconfig.json'
+          ),
+          single_file_support = false,
         },
         dockerls = {},
         rust_analyzer = {},
         docker_compose_language_service = {},
         nil_ls = {},
         denols = {
-          root_dir = require("lspconfig.util").root_pattern("deno.json", "deno.jsonc")
+          root_dir = require('lspconfig.util').root_pattern(
+            'deno.json',
+            'deno.jsonc'
+          ),
         },
       }
 
@@ -797,7 +826,7 @@ require('nix').setup {
         -- Conform can also run multiple formatters sequentially
         python = function(bufnr)
           local ruff_ =
-              require('conform').get_formatter_info('ruff_format', bufnr)
+            require('conform').get_formatter_info('ruff_format', bufnr)
           if ruff_.available then
             return { 'ruff_format' }
           else
@@ -958,10 +987,10 @@ require('nix').setup {
         },
         sources = {
           { name = 'nvim_lsp_document_symbol', keyword_length = 3 },
-          { name = 'nvim_lsp',                 keyword_length = 3 },
-          { name = 'luasnip',                  keyword_length = 3 },
-          { name = 'path',                     keyword_length = 3 },
-          { name = 'buffer',                   keyword_length = 2 },
+          { name = 'nvim_lsp', keyword_length = 3 },
+          { name = 'luasnip', keyword_length = 3 },
+          { name = 'path', keyword_length = 3 },
+          { name = 'buffer', keyword_length = 2 },
         },
       }
 
@@ -1042,7 +1071,7 @@ require('nix').setup {
         disable = function(_, buf)
           local max_filesize = 100 * 1024 -- 100 KiB
           local ok, stats =
-              pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+            pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
           if ok and stats and stats.size > max_filesize then
             return true
           end
@@ -1143,15 +1172,12 @@ require('nix').setup {
         end,
       },
     },
-    opts = {
-      integrations = {
+    config = function()
+      require('neogit').setup {
         diffview = true,
         telescope = true,
         fzf_lua = true,
-      },
-    },
-    config = function(opts)
-      require('neogit').setup(opts)
+      }
       vim.keymap.set(
         'n',
         '<leader>go',
@@ -1181,7 +1207,6 @@ require('nix').setup {
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   { import = 'custom.plugins' },
 }
-
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
