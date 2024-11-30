@@ -634,10 +634,7 @@ require("nix").setup({
         },
         jsonls = {},
         yamlls = {},
-        ts_ls = {
-          root_dir = require("lspconfig.util").root_pattern("package.json", "tsconfig.json", "jsconfig.json"),
-          single_file_support = false,
-        },
+        ts_ls = {},
         dockerls = {},
         rust_analyzer = {},
         docker_compose_language_service = {},
