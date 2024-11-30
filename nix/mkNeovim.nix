@@ -120,6 +120,7 @@ with lib;
       + (builtins.readFile ../nvim/init.lua)
       # Bootstrap/load dev plugins
       + optionalString (devPlugins != []) (
+        # lua
         ''
           local dev_pack_path = vim.fn.stdpath('data') .. '/site/pack/dev'
           local dev_plugins_dir = dev_pack_path .. '/opt'

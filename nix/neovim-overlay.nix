@@ -144,7 +144,7 @@ with final.pkgs.lib; let
       nixPluginManifest
       pkgs.vimPlugins.lazy-nvim
     ];
-in {
+in rec {
   # This is the neovim derivation
   # returned by the overlay
   nvim-pkg =
@@ -158,10 +158,26 @@ in {
       show-nix-plugin-manifest = prev.writeScriptBin "show-nix-plugin-manifest" ''
         ${prev.bat}/bin/bat ${nixPluginManifest}/lua/nix/manifest.lua
       '';
+
+      show-luarc-json = prev.writeScriptBin "show-luarc-json" ''
+        ${prev.bat}/bin/bat ${nvim-luarc-json}
+      '';
     };
 
   # This can be symlinked in the devShell's shellHook
   nvim-luarc-json = final.mk-luarc-json {
     plugins = finalPlugins;
+  };
+
+  nvim-overlay-env = prev.buildEnv {
+    name = "nvim-overlay-env";
+    paths =
+      extraPackages
+      ++ [
+        nvim-pkg
+        nvim-pkg.show-nix-plugin-manifest
+        nvim-pkg.show-luarc-json
+        (prev.vimUtils.packDir nvim-pkg.packpathDirs)
+      ];
   };
 }

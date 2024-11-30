@@ -9,12 +9,24 @@
     repo = lib.toLower drv.src.repo;
   in ''["${owner}/${repo}"] = nix_prefix .. "${drv}",'';
 
-  manifestLua = with builtins; ''
-    local nix_prefix = os.getenv("NIX_PREFIX") or ""
-    return {
-     ${concatStringsSep "\n" (map pluginManifestEntry plugins)}
-    }
-  '';
+  manifestLua = with builtins;
+  # lua
+    ''
+      local nix_prefix = os.getenv("NIX_PREFIX") or ""
+      Manifest = {
+       ${concatStringsSep "\n" (map pluginManifestEntry plugins)}
+      }
+
+      function Manifest:use(opt)
+        if opt.external then
+          self[opt.key] = opt.path
+        else
+          self[opt.key] = nix_prefix .. opt.path
+        end
+      end
+
+      return Manifest
+    '';
 in
   pkgs.vimUtils.buildVimPlugin {
     name = "nix-lazy-nvim";

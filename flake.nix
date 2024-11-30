@@ -61,6 +61,7 @@
       };
     in {
       packages = rec {
+        inherit (pkgs) nvim-overlay-env;
         default = nvim;
         nvim = pkgs.nvim-pkg;
       };
