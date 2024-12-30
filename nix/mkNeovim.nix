@@ -110,39 +110,53 @@ with lib;
     # It wraps the user init.lua, prepends the lua lib directory to the RTP
     # and appends the nvim and after directory to the RTP
     # It also adds logic for bootstrapping dev plugins (for plugin developers)
-    initLua =
-      ''
-        vim.loader.enable()
-        -- prepend lua directory
-        vim.opt.rtp:prepend('${nvimRtp}/lua')
-      ''
-      # Wrap init.lua
-      + (builtins.readFile ../nvim/init.lua)
-      # Bootstrap/load dev plugins
-      + optionalString (devPlugins != []) (
+    initLua = let
+      prelude =
+        # lua
+        ''
+          vim.loader.enable()
+          -- prepend lua directory
+          vim.opt.rtp:prepend('${nvimRtp}/lua')
+        '';
+
+      devPluginPrelude =
         # lua
         ''
           local dev_pack_path = vim.fn.stdpath('data') .. '/site/pack/dev'
           local dev_plugins_dir = dev_pack_path .. '/opt'
           local dev_plugin_path
+        '';
+      mkDevPluginRc = plugin:
+      # lua
+      ''
+        dev_plugin_path = dev_plugins_dir .. '/${plugin.name}'
+        if vim.fn.empty(vim.fn.glob(dev_plugin_path)) > 0 then
+          vim.notify('Bootstrapping dev plugin ${plugin.name} ...', vim.log.levels.INFO)
+          vim.cmd('!${pkgs.git}/bin/git clone ${plugin.url} ' .. dev_plugin_path)
+        end
+        vim.cmd('packadd! ${plugin.name}')
+      '';
+
+      rcEpilogue =
+        # lua
         ''
+          vim.opt.rtp:append('${nvimRtp}/nvim')
+          vim.opt.rtp:append('${nvimRtp}/after')
+        '';
+    in
+      # Wrap init.lua
+      prelude
+      + (builtins.readFile ../nvim/init.lua)
+      # Bootstrap/load dev plugins
+      + optionalString (devPlugins != []) (
+        devPluginPrelude
         + strings.concatMapStringsSep
         "\n"
-        (plugin: ''
-          dev_plugin_path = dev_plugins_dir .. '/${plugin.name}'
-          if vim.fn.empty(vim.fn.glob(dev_plugin_path)) > 0 then
-            vim.notify('Bootstrapping dev plugin ${plugin.name} ...', vim.log.levels.INFO)
-            vim.cmd('!${pkgs.git}/bin/git clone ${plugin.url} ' .. dev_plugin_path)
-          end
-          vim.cmd('packadd! ${plugin.name}')
-        '')
+        mkDevPluginRc
         devPlugins
       )
       # Append nvim and after directories to the runtimepath
-      + ''
-        vim.opt.rtp:append('${nvimRtp}/nvim')
-        vim.opt.rtp:append('${nvimRtp}/after')
-      '';
+      + rcEpilogue;
 
     # Add arguments to the Neovim wrapper script
     extraMakeWrapperArgs = builtins.concatStringsSep " " (
