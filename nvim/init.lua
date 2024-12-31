@@ -651,6 +651,7 @@ require("nix").setup({
         ts_ls = {},
         dockerls = {},
         rust_analyzer = {},
+        bashls = {},
         docker_compose_language_service = {},
         nil_ls = {},
         denols = {
