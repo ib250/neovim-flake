@@ -60,7 +60,8 @@ with final.pkgs.lib; let
 
     # UI.lua
     # statuscol-nvim # Status column | https://github.com/luukvbaal/statuscol.nvim/
-    catppuccin-nvim
+    # catppuccin-nvim
+    rose-pine
     nvim-treesitter-context # nvim-treesitter-context
     oil-nvim
     # ^ UI
