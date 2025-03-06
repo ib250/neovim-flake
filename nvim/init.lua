@@ -34,8 +34,15 @@
 vim.g.mapleader = ';'
 vim.g.maplocalleader = ' '
 
--- enable editorconfig support
+vim.schedule(function()
+  vim.opt.tabstop = 4
+  vim.opt.shiftwidth = 4
+  vim.opt.expandtab = true
+  vim.opt.clipboard = 'unnamedplus'
+end)
+
 vim.g.editorconfig = true
+
 
 -- autochange directories to the openned files
 vim.opt.autochdir = true
@@ -63,10 +70,6 @@ vim.opt.showmode = false
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.schedule(function()
-  vim.opt.clipboard = 'unnamedplus'
-end)
-
 -- Enable break indent
 vim.opt.breakindent = true
 
