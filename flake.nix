@@ -1,77 +1,125 @@
 {
-  description = "Neovim derivation";
+  description = "Neovim derivation based on nightly";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    gen-luarc.url = "github:mrcjkb/nix-gen-luarc-json";
-
-    # Add bleeding-edge plugins here.
-    # They can be updated with `nix flake update` (make sure to commit the generated flake.lock)
-    # wf-nvim = {
-    #   url = "github:Cassin01/wf.nvim";
-    #   flake = false;
-    # };
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
-  outputs = inputs @ {
-    self,
-    nixpkgs,
-    flake-utils,
-    gen-luarc,
-    ...
-  }: let
-    supportedSystems = [
-      "x86_64-linux"
-      "aarch64-linux"
-      "x86_64-darwin"
-      "aarch64-darwin"
-    ];
+  outputs =
+    {
+      nixpkgs,
+      flake-utils,
+      neovim-nightly-overlay,
+      ...
+    }:
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
 
-    # This is where the Neovim derivation is built.
-    neovim-overlay = import ./nix/neovim-overlay.nix {inherit inputs;};
-  in
-    flake-utils.lib.eachSystem supportedSystems (system: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          # Import the overlay, so that the final Neovim derivation(s) can be accessed via pkgs.<nvim-pkg>
-          neovim-overlay
-          # This adds a function can be used to generate a .luarc.json
-          # containing the Neovim API all plugins in the workspace directory.
-          # The generated file can be symlinked in the devShell's shellHook.
-          gen-luarc.overlays.default
-        ];
+      named = drv: {
+        inherit (drv) name;
+        value = drv;
       };
-      shell = pkgs.mkShell {
-        name = "nvim-devShell";
-        buildInputs = with pkgs; [
-          # Tools for Lua and Nix development, useful for editing files in this repo
-          lua-language-server
-          nil
-          stylua
-          luajitPackages.luacheck
-          self.packages.${system}.nvim.show-nix-plugin-manifest
-          alejandra
-        ];
-        shellHook = ''
-          # symlink the .luarc.json generated in the overlay
-          ln -fs ${pkgs.nvim-luarc-json} .luarc.json
-        '';
-      };
-    in {
-      packages = rec {
-        inherit (pkgs) nvim-overlay-env;
-        default = nvim;
-        nvim = pkgs.nvim-pkg;
-      };
-      devShells = {
-        default = shell;
-      };
-      formatter = pkgs.alejandra;
-    })
-    // {
-      # You can add this overlay to your NixOS configuration
-      overlays.default = neovim-overlay;
-    };
+    in
+    flake-utils.lib.eachSystem supportedSystems (
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+
+
+        plugins =
+          with pkgs.vimPlugins;
+          (map named [
+            nvim-treesitter-context
+            nvim-treesitter-pyfold
+            nvim-treesitter-textobjects
+            nvim-treesitter.withAllGrammars
+
+            comment-nvim
+            oil-nvim
+            todo-comments-nvim
+            guess-indent-nvim
+
+            gitsigns-nvim
+
+            telescope-frecency-nvim
+            telescope-fzf-native-nvim
+            telescope-nvim
+            telescope-ui-select-nvim
+
+            nvim-lspconfig
+            blink-cmp
+
+            clangd_extensions-nvim
+            rust-tools-nvim
+            vim-just
+
+            rose-pine
+
+            plenary-nvim
+            sqlite-lua
+            which-key-nvim
+          ]);
+
+        neovim-nightly = neovim-nightly-overlay.packages.${system};
+        neovim-env = pkgs.buildEnv {
+          pname = "nvim";
+          inherit (neovim-nightly.default) version;
+          name = "neovim-nightly-env";
+          paths = [
+            neovim-nightly.default
+            (
+              let
+
+                farm = pkgs.linkFarm "opt-contents" (builtins.listToAttrs plugins);
+
+              in
+              pkgs.runCommand "neovim-nightly-env-plugins" { } ''
+                mkdir -p $out/opt/pack/nightly-plugin/
+                ln -snf ${farm} $out/opt/pack/nightly-plugin/start
+              ''
+            )
+          ];
+        };
+
+        shell = pkgs.mkShell {
+          name = "nvim-devShell";
+          buildInputs = with pkgs; [
+            # Tools for Lua and Nix development, useful for editing files in this repo
+            lua-language-server
+            nil
+            stylua
+            luajitPackages.luacheck
+            alejandra
+            (
+              pkgs.writeScriptBin "nvim.test" ''
+                export NVIM_APPNAME=nightly
+                ${neovim-env}/bin/nvim "$@"
+              ''
+            )
+          ];
+          shellHook = ''
+            ln -snf $(pwd)/result/opt/pack $(pwd)/config/nvim/pack
+            ln -snf $(pwd)/config/nvim ~/.config/nightly
+          ''
+          ;
+        };
+      in
+      {
+        packages = rec {
+          default = neovim-env;
+          nvim = default;
+        };
+
+        devShells = {
+          default = shell;
+        };
+        formatter = pkgs.alejandra;
+      }
+    );
 }
