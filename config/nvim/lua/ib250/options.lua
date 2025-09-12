@@ -1,20 +1,93 @@
-vim.loader.enable()
-vim.g.mapleader = ";"
-vim.g.maplocalleader = " "
-vim.g.editorconfig = true
-vim.o.winborder = "solid"
-vim.opt.autochdir = true
-vim.o.number = true
-vim.o.relativenumber = true
-vim.o.signcolumn = "yes:1"
-vim.o.termguicolors = true
-vim.o.wrap = true
-vim.o.tabstop = 4
-vim.o.swapfile = false
-vim.o.smartcase = true
-
-vim.g.ts_max_filesize_kb = 1000
+vim.g.mapleader = ';'
+vim.g.maplocalleader = ' '
 
 vim.schedule(function()
+  vim.opt.tabstop = 4
+  vim.opt.shiftwidth = 4
+  vim.opt.expandtab = true
   vim.opt.clipboard = 'unnamedplus'
 end)
+
+vim.g.editorconfig = true
+
+-- autochange directories to the openned files
+vim.opt.autochdir = true
+
+-- Set to true if you have a Nerd Font installed
+vim.g.have_nerd_font = false
+
+-- Make line numbers default
+vim.opt.number = true
+vim.opt.relativenumber = true
+
+-- Enable mouse mode, can be useful for resizing splits for example!
+vim.opt.mouse = 'a'
+vim.opt.breakindent = true
+
+vim.opt.undofile = true
+
+-- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+
+-- Keep signcolumn on by default
+vim.opt.signcolumn = 'yes'
+
+-- Decrease update time
+vim.opt.updatetime = 250
+
+-- Decrease mapped sequence wait time
+-- Displays which-key popup sooner
+vim.opt.timeoutlen = 300
+
+-- Configure how new splits should be opened
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+
+vim.opt.list = true
+vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+
+-- Preview substitutions live, as you type!
+vim.opt.inccommand = 'split'
+
+-- Show which line your cursor is on
+vim.opt.cursorline = true
+
+-- Minimal number of screen lines to keep above and below the cursor.
+vim.opt.scrolloff = 10
+
+-- enable folding
+vim.opt.foldenable = true
+vim.opt.foldlevelstart = 1
+
+-- Set highlight on search, but clear on pressing <Esc> in normal mode
+vim.opt.hlsearch = true
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
+vim.keymap.set(
+  't',
+  '<Esc><Esc>',
+  '<C-\\><C-n>',
+  { desc = 'Exit terminal mode' }
+)
+
+
+-- some ui autocmds I am used to
+vim.api.nvim_create_autocmd('TextYankPost', {
+  desc = 'Highlight when yanking (copying) text',
+  group = vim.api.nvim_create_augroup(
+    'kickstart-highlight-yank',
+    { clear = true }
+  ),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
+
+vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+  pattern = { '.envrc' },
+  callback = function()
+    vim.cmd.setfiletype 'sh'
+  end,
+})

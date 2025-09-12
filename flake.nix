@@ -6,50 +6,56 @@
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
-  outputs =
-    {
-      nixpkgs,
-      flake-utils,
-      neovim-nightly-overlay,
-      ...
-    }:
-    let
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+  outputs = {
+    nixpkgs,
+    flake-utils,
+    neovim-nightly-overlay,
+    ...
+  }: let
+    supportedSystems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
 
-      named = drv: {
-        inherit (drv) name;
-        value = drv;
-      };
-    in
+    named = drv: {
+      name = drv.pname or drv.name;
+      value = drv;
+    };
+  in
     flake-utils.lib.eachSystem supportedSystems (
-      system:
-      let
-        pkgs = import nixpkgs { inherit system; };
+      system: let
+        pkgs = import nixpkgs {inherit system;};
 
+        nvim-treesitter-package = with pkgs.vimPlugins;
+          nvim-treesitter.withAllGrammars;
 
-        plugins =
-          with pkgs.vimPlugins;
-          (map named [
+        plugins = with pkgs.vimPlugins; {
+          start = map named [
+            nvim-treesitter-package
             nvim-treesitter-context
-            nvim-treesitter-pyfold
             nvim-treesitter-textobjects
-            nvim-treesitter.withAllGrammars
 
-            comment-nvim
+            nvim-origami
+
             oil-nvim
-            todo-comments-nvim
             guess-indent-nvim
+            rose-pine
 
+            which-key-nvim
+            comment-nvim
+            todo-comments-nvim
+
+            plenary-nvim
+          ];
+
+          opt = map named [
             gitsigns-nvim
 
+            telescope-nvim
             telescope-frecency-nvim
             telescope-fzf-native-nvim
-            telescope-nvim
             telescope-ui-select-nvim
 
             nvim-lspconfig
@@ -59,12 +65,9 @@
             rust-tools-nvim
             vim-just
 
-            rose-pine
-
-            plenary-nvim
             sqlite-lua
-            which-key-nvim
-          ]);
+          ];
+        };
 
         neovim-nightly = neovim-nightly-overlay.packages.${system};
         neovim-env = pkgs.buildEnv {
@@ -73,16 +76,36 @@
           name = "neovim-nightly-env";
           paths = [
             neovim-nightly.default
+            pkgs.alejandra
+            pkgs.nil
+            pkgs.lua-language-server
+            pkgs.stylua
             (
               let
+                start =
+                  pkgs.linkFarm "opt-start-contents" (builtins.listToAttrs
+                    plugins.start);
 
-                farm = pkgs.linkFarm "opt-contents" (builtins.listToAttrs plugins);
+                opt =
+                  pkgs.linkFarm "opt-opt-contents" (builtins.listToAttrs
+                    plugins.opt);
+
+                ts-grammars = with nvim-treesitter-package.passthru;
+                  pkgs.symlinkJoin {
+                    name = "nvim-treesitter-grammars";
+                    paths = dependencies;
+                  };
 
               in
-              pkgs.runCommand "neovim-nightly-env-plugins" { } ''
-                mkdir -p $out/opt/pack/nightly-plugin/
-                ln -snf ${farm} $out/opt/pack/nightly-plugin/start
-              ''
+                pkgs.runCommand "neovim-nightly-env-plugins" {} ''
+                  mkdir -p $out/opt/pack/nightly-plugin/{start,opt}
+
+                  ln -snf ${start}/* $out/opt/pack/nightly-plugin/start/
+                  ln -snf ${ts-grammars} \
+                    $out/opt/pack/nightly-plugin/start/${ts-grammars.name}
+
+                  ln -snf ${opt}/* $out/opt/pack/nightly-plugin/opt/
+                ''
             )
           ];
         };
@@ -106,11 +129,9 @@
           shellHook = ''
             ln -snf $(pwd)/result/opt/pack $(pwd)/config/nvim/pack
             ln -snf $(pwd)/config/nvim ~/.config/nightly
-          ''
-          ;
+          '';
         };
-      in
-      {
+      in {
         packages = rec {
           default = neovim-env;
           nvim = default;
