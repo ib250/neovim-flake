@@ -3,3 +3,4 @@ result
 .luarc.json
 *.bak
 *.old
+scratch

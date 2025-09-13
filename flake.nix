@@ -117,11 +117,12 @@
           name = "nvim-devShell";
           buildInputs = with pkgs; [
             # Tools for Lua and Nix development, useful for editing files in this repo
-            lua-language-server
             nil
+            statix
+            nixfmt
+            lua-language-server
             stylua
             luajitPackages.luacheck
-            alejandra
             (pkgs.writeScriptBin "nvim.test" ''
               export NVIM_APPNAME=nightly
               ${neovim-env}/bin/nvim "$@"
@@ -142,7 +143,7 @@
         devShells = {
           default = shell;
         };
-        formatter = pkgs.alejandra;
+        formatter = pkgs.nixfmt;
       }
     );
 }
