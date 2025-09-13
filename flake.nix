@@ -78,29 +78,22 @@
           pname = "nvim";
           inherit (neovim-nightly.default) version;
           name = "neovim-nightly-env";
-          paths = [
-            neovim-nightly.default
-            pkgs.alejandra
-            pkgs.nil
-            pkgs.lua-language-server
-            pkgs.stylua
-            (
-              let
-                start = pkgs.linkFarm "opt-start-contents" (builtins.listToAttrs plugins.start);
+          paths =
+            let
+              start = pkgs.linkFarm "opt-start-contents" (builtins.listToAttrs plugins.start);
 
-                opt = pkgs.linkFarm "opt-opt-contents" (builtins.listToAttrs plugins.opt);
+              opt = pkgs.linkFarm "opt-opt-contents" (builtins.listToAttrs plugins.opt);
 
-                # NOTE: bundle the parsers in a single directory
-                # so we can add it somewhere in packpath/start
-                ts-grammars =
-                  with nvim-treesitter-package.passthru;
-                  pkgs.symlinkJoin {
-                    name = "nvim-treesitter-grammars";
-                    paths = dependencies;
-                  };
+              # NOTE: bundle the parsers in a single directory
+              # so we can add it somewhere in packpath/start
+              ts-grammars =
+                with nvim-treesitter-package.passthru;
+                pkgs.symlinkJoin {
+                  name = "nvim-treesitter-grammars";
+                  paths = dependencies;
+                };
 
-              in
-              pkgs.runCommand "neovim-nightly-env-plugins" { } ''
+              packdir = pkgs.runCommand "neovim-nightly-env-plugins" { } ''
                 mkdir -p $out/opt/pack/nightly-plugin/{start,opt}
 
                 ln -snf ${start}/* $out/opt/pack/nightly-plugin/start/
@@ -108,9 +101,24 @@
                   $out/opt/pack/nightly-plugin/start/${ts-grammars.name}
 
                 ln -snf ${opt}/* $out/opt/pack/nightly-plugin/opt/
-              ''
-            )
-          ];
+              '';
+
+              cfgdir = pkgs.runCommand "neovim-nightly-appconfig" { } ''
+                mkdir -p $out/opt/config/nvim
+                ln -snf ${./config}/nvim/* $out/opt/config/nvim/
+                ln -snf ${packdir}/opt/pack $out/opt/config/nvim/
+              '';
+            in
+            [
+              neovim-nightly.default
+              pkgs.nixfmt
+              pkgs.nil
+              pkgs.lua-language-server
+              pkgs.stylua
+              pkgs.statix
+              packdir
+              cfgdir
+            ];
         };
 
         shell = pkgs.mkShell {
@@ -128,10 +136,6 @@
               ${neovim-env}/bin/nvim "$@"
             '')
           ];
-          shellHook = ''
-            ln -snf $(pwd)/result/opt/pack $(pwd)/config/nvim/pack
-            ln -snf $(pwd)/config/nvim ~/.config/nightly
-          '';
         };
       in
       {

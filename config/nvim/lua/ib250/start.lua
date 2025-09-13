@@ -80,6 +80,28 @@ require("nvim-treesitter.configs").setup {
   context = { enable = true, max_lines = 4 },
   indent = { enable = true },
   lsp_interop = { enable = true },
+  textobjects = {
+    select = {
+      enable = true,
+      lsp_interop = {
+        enable = true,
+        border = "none",
+        floating_preview_opts = {},
+        peek_definition_code = {
+          ["<leader>cp"] = "@function.outer",
+          ["<leader>cP"] = "@class.outer",
+        },
+      },
+      keymaps = {
+        -- You can use the capture groups defined in textobjects.scm
+        ["af"] = { query = "@function.outer", desc = "Select around function" },
+        ["if"] = { query = "@function.inner", desc = "Select inside function" },
+        ["ac"] = { query = "@class.outer", desc = "Select around class" },
+        -- you can optionally set descriptions to the mappings (used in the desc parameter of nvim_buf_set_keymap
+        ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
+      }
+    }
+  }
 }
 
 -- origami

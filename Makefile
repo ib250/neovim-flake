@@ -9,10 +9,7 @@ develop:
 update:
 	nix flake update
 
-format:
-	nix fmt
-
-sync: format
+sync:
 	git commit -am "sync"
 	git push
 
