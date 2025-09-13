@@ -160,6 +160,8 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
   callback = function()
     vim.cmd.packadd "nvim-lspconfig"
     vim.cmd.packadd "blink.cmp"
+    vim.cmd.packadd "clangd_extensions.nvim"
+    vim.cmd.packadd "rust-tools.nvim"
 
     local servers = {
       lua_ls = {
