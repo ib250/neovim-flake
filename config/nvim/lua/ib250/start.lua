@@ -82,6 +82,7 @@ require("nvim-treesitter.configs").setup {
   lsp_interop = { enable = true },
 }
 
+-- origami
 require("origami").setup {
   useLspFoldsWithTreesitterFallback = true,
   pauseFoldsOnSearch = true,
@@ -97,7 +98,7 @@ require("origami").setup {
   },
   autoFold = {
     enabled = true,
-    kinds = { "comment", "imports" }, ---@type lsp.FoldingRangeKind[]
+    kinds = { "comment", "imports" },
   },
   foldKeymaps = {
     setup = false, -- modifies `h`, `l`, and `$`

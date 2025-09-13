@@ -6,30 +6,34 @@
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
-  outputs = {
-    nixpkgs,
-    flake-utils,
-    neovim-nightly-overlay,
-    ...
-  }: let
-    supportedSystems = [
-      "x86_64-linux"
-      "aarch64-linux"
-      "x86_64-darwin"
-      "aarch64-darwin"
-    ];
+  outputs =
+    {
+      nixpkgs,
+      flake-utils,
+      neovim-nightly-overlay,
+      ...
+    }:
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
 
-    named = drv: {
-      name = drv.pname or drv.name;
-      value = drv;
-    };
-  in
+      named = drv: {
+        name = drv.pname or drv.name;
+        value = drv;
+      };
+    in
     flake-utils.lib.eachSystem supportedSystems (
-      system: let
-        pkgs = import nixpkgs {inherit system;};
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
 
-        nvim-treesitter-package = with pkgs.vimPlugins;
-          nvim-treesitter.withAllGrammars;
+        # NOTE: this allows the queries to be bundled into nvim-treesitter
+        # for the parsers themselves, we need to handle that separately
+        nvim-treesitter-package = with pkgs.vimPlugins; nvim-treesitter.withAllGrammars;
 
         plugins = with pkgs.vimPlugins; {
           start = map named [
@@ -82,30 +86,29 @@
             pkgs.stylua
             (
               let
-                start =
-                  pkgs.linkFarm "opt-start-contents" (builtins.listToAttrs
-                    plugins.start);
+                start = pkgs.linkFarm "opt-start-contents" (builtins.listToAttrs plugins.start);
 
-                opt =
-                  pkgs.linkFarm "opt-opt-contents" (builtins.listToAttrs
-                    plugins.opt);
+                opt = pkgs.linkFarm "opt-opt-contents" (builtins.listToAttrs plugins.opt);
 
-                ts-grammars = with nvim-treesitter-package.passthru;
+                # NOTE: bundle the parsers in a single directory
+                # so we can add it somewhere in packpath/start
+                ts-grammars =
+                  with nvim-treesitter-package.passthru;
                   pkgs.symlinkJoin {
                     name = "nvim-treesitter-grammars";
                     paths = dependencies;
                   };
 
               in
-                pkgs.runCommand "neovim-nightly-env-plugins" {} ''
-                  mkdir -p $out/opt/pack/nightly-plugin/{start,opt}
+              pkgs.runCommand "neovim-nightly-env-plugins" { } ''
+                mkdir -p $out/opt/pack/nightly-plugin/{start,opt}
 
-                  ln -snf ${start}/* $out/opt/pack/nightly-plugin/start/
-                  ln -snf ${ts-grammars} \
-                    $out/opt/pack/nightly-plugin/start/${ts-grammars.name}
+                ln -snf ${start}/* $out/opt/pack/nightly-plugin/start/
+                ln -snf ${ts-grammars} \
+                  $out/opt/pack/nightly-plugin/start/${ts-grammars.name}
 
-                  ln -snf ${opt}/* $out/opt/pack/nightly-plugin/opt/
-                ''
+                ln -snf ${opt}/* $out/opt/pack/nightly-plugin/opt/
+              ''
             )
           ];
         };
@@ -119,19 +122,18 @@
             stylua
             luajitPackages.luacheck
             alejandra
-            (
-              pkgs.writeScriptBin "nvim.test" ''
-                export NVIM_APPNAME=nightly
-                ${neovim-env}/bin/nvim "$@"
-              ''
-            )
+            (pkgs.writeScriptBin "nvim.test" ''
+              export NVIM_APPNAME=nightly
+              ${neovim-env}/bin/nvim "$@"
+            '')
           ];
           shellHook = ''
             ln -snf $(pwd)/result/opt/pack $(pwd)/config/nvim/pack
             ln -snf $(pwd)/config/nvim ~/.config/nightly
           '';
         };
-      in {
+      in
+      {
         packages = rec {
           default = neovim-env;
           nvim = default;
