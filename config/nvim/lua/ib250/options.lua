@@ -91,3 +91,14 @@ vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
     vim.cmd.setfiletype 'sh'
   end,
 })
+
+
+vim.api.nvim_create_autocmd('TermOpen', {
+  desc = 'Terminal mode defaults',
+  group = vim.api.nvim_create_augroup(
+    'termopen-defaults', { clear = true }
+  ),
+  callback = function()
+    print("setting terminal defaults")
+  end
+})

@@ -3,14 +3,14 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    # NOTE(broken): neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
   outputs =
     {
       nixpkgs,
       flake-utils,
-      neovim-nightly-overlay,
+      # NOTE(broken): neovim-nightly-overlay,
       ...
     }:
     let
@@ -31,7 +31,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        # NOTE: this allows the queries to be bundled into nvim-treesitter
+        # NOTE(treesitter): this allows the queries to be bundled into nvim-treesitter
         # for the parsers themselves, we need to handle that separately
         nvim-treesitter-package = with pkgs.vimPlugins; nvim-treesitter.withAllGrammars;
 
@@ -66,17 +66,19 @@
             blink-cmp
 
             clangd_extensions-nvim
-            rust-tools-nvim
+            rustaceanvim
             vim-just
 
             sqlite-lua
           ];
         };
 
-        neovim-nightly = neovim-nightly-overlay.packages.${system};
+        # NOTE(broken): neovim-nightly-overlay.packages.${system}.default;
+        _neovim = pkgs.neovim;
+
         neovim-env = pkgs.buildEnv {
           pname = "nvim";
-          inherit (neovim-nightly.default) version;
+          inherit (_neovim) version;
           name = "neovim-nightly-env";
           paths =
             let
@@ -107,15 +109,23 @@
                 mkdir -p $out/opt/config/nvim
                 ln -snf ${./config}/nvim/* $out/opt/config/nvim/
                 ln -snf ${packdir}/opt/pack $out/opt/config/nvim/
+
+                mkdir -p $out/opt/config/nvim/{parser,queries}
+                ln -snf ${ts-grammars}/parser/* $out/opt/config/nvim/parser/
+                ln -snf ${ts-grammars}/queries/* $out/opt/config/nvim/queries/
               '';
             in
             [
-              neovim-nightly.default
+              _neovim
+              pkgs.tree-sitter
               pkgs.nixfmt
               pkgs.nil
               pkgs.lua-language-server
+              pkgs.luajitPackages.luacheck
               pkgs.stylua
               pkgs.statix
+              pkgs.bash-language-server
+              pkgs.efm-langserver
               packdir
               cfgdir
             ];
@@ -123,18 +133,16 @@
 
         shell = pkgs.mkShell {
           name = "nvim-devShell";
-          buildInputs = with pkgs; [
-            # Tools for Lua and Nix development, useful for editing files in this repo
-            nil
-            statix
-            nixfmt
-            lua-language-server
-            stylua
-            luajitPackages.luacheck
-            (pkgs.writeScriptBin "nvim.test" ''
-              export NVIM_APPNAME=nightly
-              ${neovim-env}/bin/nvim "$@"
-            '')
+          buildInputs = [
+            neovim-env
+            (
+              pkgs.writeScriptBin "nvim.test"
+              # bash
+              ''
+                  export XDG_CONFIG_HOME=${neovim-env}/opt/config
+                  ${neovim-env}/bin/nvim "$@"
+              ''
+            )
           ];
         };
       in

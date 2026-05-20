@@ -4,6 +4,8 @@ end
 
 vim.g.ib250_start = true
 
+require("vim._core.ui2").enable {}
+
 -- which-key
 require("which-key").setup {
   preset = 'helix',
@@ -64,7 +66,7 @@ require("todo-comments").setup {}
 
 -- nvim-treesitter
 ---@diagnostic disable-next-line: missing-fields
-require("nvim-treesitter.configs").setup {
+require("nvim-treesitter").setup {
   highlight = {
     enable = true,
     disable = function(_, buf)
@@ -105,27 +107,17 @@ require("nvim-treesitter.configs").setup {
 }
 
 -- origami
-require("origami").setup {
-  useLspFoldsWithTreesitterFallback = true,
-  pauseFoldsOnSearch = true,
-  foldtext = {
-    enabled = true,
-    padding = 3,
-    lineCount = {
-      template = "%d lines", -- `%d` is replaced with the number of folded lines
-      hlgroup = "Comment",
-    },
-    diagnosticsCount = true, -- uses hlgroups and icons from `vim.diagnostic.config().signs`
-    gitsignsCount = true,    -- requires `gitsigns.nvim`
-  },
-  autoFold = {
-    enabled = true,
-    kinds = { "comment", "imports" },
-  },
-  foldKeymaps = {
-    setup = false, -- modifies `h`, `l`, and `$`
-    hOnlyOpensOnFirstColumn = false,
-  },
-}
+require("origami").setup {}
 
-vim.cmd.colorscheme("rose-pine")
+vim.api.nvim_create_autocmd('VimEnter', {
+  callback = function()
+    vim.cmd.GuessIndent()
+    vim.cmd.colorscheme("rose-pine")
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function(ev)
+    pcall(vim.treesitter.start, ev.buf)
+  end
+})
