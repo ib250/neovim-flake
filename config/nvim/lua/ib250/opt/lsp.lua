@@ -154,31 +154,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-vim.g.lsp_servers = {
-  lua_ls = {
-  },
-  clangd = {
-    capabilities = { offsetEncoding = 'utf-16' },
-  },
-  gopls = {},
-  pyright = {},
-  ruff = {
-    capabilities = {
-      hoverProvider = false,
-    },
-  },
-  jsonls = {},
-  yamlls = {},
-  ts_ls = {},
-  dockerls = {},
-  rust_analyzer = {},
-  bashls = {},
-  docker_compose_language_service = {},
-  nil_ls = {},
-  statix = {},
-  denols = {},
-}
-
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
   desc = "lspconfig setup",
   once = true,
@@ -187,7 +162,6 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     vim.cmd.packadd "blink.cmp"
     vim.cmd.packadd "clangd_extensions.nvim"
     vim.cmd.packadd "rustaceanvim"
-
     local blink = require("blink.cmp")
     blink.setup {
       keymap = { preset = 'default' },
@@ -200,7 +174,5 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
     }
-
-    vim.lsp.enable(vim.tbl_keys(vim.g.lsp_servers))
   end
 })

@@ -4,6 +4,8 @@ end
 
 vim.g.ib250_start = true
 
+vim.cmd.packadd "nvim.difftool"
+
 require("vim._core.ui2").enable {}
 
 -- which-key
