@@ -1,7 +1,7 @@
 vim.diagnostic.config {
-  underline  = true,
-  virtual_text = false,
-  signs = true,
+  underline        = true,
+  virtual_text     = false,
+  signs            = true,
   update_in_insert = false,
 }
 
@@ -9,13 +9,13 @@ vim.diagnostic.config {
 vim.keymap.set(
   'n',
   '[d',
-  vim.diagnostic.goto_prev,
+  function() vim.diagnostic.jump { count = -1, float = true } end,
   { desc = 'Go to previous [D]iagnostic message' }
 )
 vim.keymap.set(
   'n',
   ']d',
-  vim.diagnostic.goto_next,
+  function() vim.diagnostic.jump { count = 1, float = true } end,
   { desc = 'Go to next [D]iagnostic message' }
 )
 vim.keymap.set(
@@ -154,6 +154,31 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+vim.g.lsp_servers = {
+  lua_ls = {
+  },
+  clangd = {
+    capabilities = { offsetEncoding = 'utf-16' },
+  },
+  gopls = {},
+  pyright = {},
+  ruff = {
+    capabilities = {
+      hoverProvider = false,
+    },
+  },
+  jsonls = {},
+  yamlls = {},
+  ts_ls = {},
+  dockerls = {},
+  rust_analyzer = {},
+  bashls = {},
+  docker_compose_language_service = {},
+  nil_ls = {},
+  statix = {},
+  denols = {},
+}
+
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
   desc = "lspconfig setup",
   once = true,
@@ -163,121 +188,19 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     vim.cmd.packadd "clangd_extensions.nvim"
     vim.cmd.packadd "rustaceanvim"
 
-    local servers = {
-      lua_ls = {
-        -- cmd = {...},
-        -- filetypes = { ...},
-        -- capabilities = {},
-        settings = {
-          Lua = {
-            runtime = {
-              version = 'LuaJIT',
-            },
-            completion = {
-              callSnippet = 'Replace',
-            },
-            diagnostics = {
-              -- Get the language server to recognize the `vim` global, etc.
-              globals = {
-                'vim',
-                'describe',
-                'it',
-                'assert',
-                'stub',
-              },
-              disable = { 'duplicate-set-field' },
-            },
-            workspace = {
-              checkThirdParty = false,
-            },
-            telemetry = {
-              enable = false,
-            },
-            hint = { -- inlay hints (supported in Neovim >= 0.10)
-              enable = true,
-            },
-          },
-        },
-      },
-      -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-      --
-      -- Some languages (like typescript) have entire language plugins that can be useful:
-      --    https://github.com/pmizio/typescript-tools.nvim
-      --
-      -- But for many setups, the LSP (`tsserver`) will work just fine
-      clangd = {
-        capabilities = { offsetEncoding = 'utf-16' },
-      },
-      gopls = {},
-      pyright = {},
-      ruff = {
-        capabilities = {
-          hoverProvider = false,
-        },
-      },
-      jsonls = {},
-      yamlls = {},
-      ts_ls = {},
-      dockerls = {},
-      rust_analyzer = {},
-      bashls = {},
-      docker_compose_language_service = {},
-      nil_ls = {},
-      statix = {},
-      denols = {
-        root_dir = require('lspconfig.util').root_pattern(
-          'deno.json',
-          'deno.jsonc'
-        ),
-      },
-    }
-
     local blink = require("blink.cmp")
     blink.setup {
-      -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
-      -- 'super-tab' for mappings similar to vscode (tab to accept)
-      -- 'enter' for enter to accept
-      -- 'none' for no mappings
-      --
-      -- All presets have the following mappings:
-      -- C-space: Open menu or open docs if already open
-      -- C-n/C-p or Up/Down: Select next/previous item
-      -- C-e: Hide menu
-      -- C-k: Toggle signature help (if signature.enabled = true)
-      --
-      -- See :h blink-cmp-config-keymap for defining your own keymap
       keymap = { preset = 'default' },
 
-      appearance = {
-        -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-        -- Adjusts spacing to ensure icons are aligned
-        nerd_font_variant = 'mono'
-      },
+      appearance = { nerd_font_variant = 'mono' },
 
-      -- (Default) Only show the documentation popup when manually triggered
       completion = { documentation = { auto_show = true } },
 
-      -- Default list of enabled providers defined so that you can extend it
-      -- elsewhere in your config, without redefining it, due to `opts_extend`
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
-
-      -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
-      -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
-      -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
-      --
-      -- See the fuzzy documentation for more information
-      fuzzy = { implementation = "prefer_rust_with_warning" }
     }
 
-    local lspconfig = require("lspconfig")
-    for server, config in ipairs(servers) do
-      config.capabilities = blink.get_lsp_capabilities(
-        config.capabilities or lspconfig[server].capabilities or {}, true
-      )
-      lspconfig[server].setup(config)
-      vim.lsp.enable(server)
-    end
+    vim.lsp.enable(vim.tbl_keys(vim.g.lsp_servers))
   end
 })
