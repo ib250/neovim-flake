@@ -1,6 +1,8 @@
 vim.g.mapleader = ';'
 vim.g.maplocalleader = ' '
 
+vim.opt.exrc = true
+
 vim.schedule(function()
   vim.opt.tabstop = 4
   vim.opt.shiftwidth = 4
