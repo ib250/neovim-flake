@@ -1,16 +1,11 @@
-vim.g.mapleader = ';'
-vim.g.maplocalleader = ' '
+vim.g.mapleader = ";"
+vim.g.maplocalleader = " "
 
 vim.opt.exrc = true
 
-vim.schedule(function()
-  vim.opt.tabstop = 4
-  vim.opt.shiftwidth = 4
-  vim.opt.expandtab = true
-  vim.opt.clipboard = 'unnamedplus'
-end)
-
-vim.g.editorconfig = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
 
 -- autochange directories to the openned files
 vim.opt.autochdir = true
@@ -23,7 +18,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
+vim.opt.mouse = "a"
 vim.opt.breakindent = true
 
 vim.opt.undofile = true
@@ -33,7 +28,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
-vim.opt.signcolumn = 'yes'
+vim.opt.signcolumn = "yes"
 
 -- Decrease update time
 vim.opt.updatetime = 250
@@ -47,10 +42,10 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
 -- Preview substitutions live, as you type!
-vim.opt.inccommand = 'split'
+vim.opt.inccommand = "split"
 
 -- Show which line your cursor is on
 vim.opt.cursorline = true
@@ -64,43 +59,17 @@ vim.opt.foldlevelstart = 1
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 vim.keymap.set(
-  't',
-  '<Esc><Esc>',
-  '<C-\\><C-n>',
-  { desc = 'Exit terminal mode' }
+  "t",
+  "<Esc><Esc>",
+  "<C-\\><C-n>",
+  { desc = "Exit terminal mode" }
 )
 
 
--- some ui autocmds I am used to
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup(
-    'kickstart-highlight-yank',
-    { clear = true }
-  ),
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-})
-
-vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
-  pattern = { '.envrc' },
-  callback = function()
-    vim.cmd.setfiletype 'sh'
-  end,
-})
-
-
-vim.api.nvim_create_autocmd('TermOpen', {
-  desc = 'Terminal mode defaults',
-  group = vim.api.nvim_create_augroup(
-    'termopen-defaults', { clear = true }
-  ),
-  callback = function()
-    print("setting terminal defaults")
-  end
-})
+vim.schedule(function()
+  vim.opt.clipboard = "unnamedplus"
+end)

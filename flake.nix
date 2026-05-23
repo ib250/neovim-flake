@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
     # NOTE(broken): neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     nix-appimage.url = "github:ralismark/nix-appimage";
     nix-appimage.inputs.nixpkgs.follows = "nixpkgs";
@@ -141,16 +142,13 @@
 
           nvim = default;
 
+        }
+        // pkgs.lib.optionalAttrs (matches "^.*-linux" system) {
           appimage =
-            if matches "^.*-linux" system then
-              (
-                with nix-appimage.lib.${system};
-                mkAppImage {
-                  program = "${nvim}/bin/nvim";
-                }
-              )
-            else
-              throw "Unsupported system=${system} for appimage, only works on linux";
+            with nix-appimage.lib.${system};
+            mkAppImage {
+              program = "${nvim}/bin/nvim";
+            };
 
         };
 
